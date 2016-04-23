@@ -19,7 +19,7 @@
 - prepare a framework bundle:
 
 
-```
+```bash
 zip -qr MyFramework.zip MyFramework.framework/
 ```
 
@@ -29,7 +29,7 @@ zip -qr MyFramework.zip MyFramework.framework/
 
 - Download and run the framework bundle on client:
 
-```
+```swift
 import FrameworkLoader
 
 let url = NSURL(string: "http://localhost:8080/frameworks/MyFramework.zip")!;
@@ -78,7 +78,7 @@ Loader(request: request).fetchAsync { (fetchError, loader) in
 
 - load previously loaded framework bundle:
 
-```
+```swift
 import FrameworkLoader
 
 guard let bundle = Bundle(name: "MyFramework") else { return }
@@ -111,7 +111,9 @@ methodWithArg("Hi there!") // show alert with title 'Hi there!'
 - add to Podfile:
 
 ```
-pod 'FrameworkLoader', :git => ''
+use_frameworks!
+
+pod 'FrameworkLoader', :git => 'https://github.com/mikehouse/FrameworkLoader.git'
 ```
 
 - after run "pod update"
