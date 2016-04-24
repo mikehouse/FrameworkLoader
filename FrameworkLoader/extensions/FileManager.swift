@@ -50,7 +50,9 @@ extension NSFileManager {
         let rootPath = NSSearchPathForDirectoriesInDomains(.ApplicationSupportDirectory, .UserDomainMask, true).first!
         let frameworks = (rootPath as NSString).stringByAppendingPathComponent("CustomFrameworks")
         if !fileExistsAtPath(frameworks) {
-            try! createDirectoryAtPath(frameworks, withIntermediateDirectories: true, attributes: nil) // must not fail
+            let url = NSURL(fileURLWithPath: frameworks, isDirectory: true)
+            try! createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
+            try! url.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)// don't want to back up this folder
         }
         return frameworks
     }
