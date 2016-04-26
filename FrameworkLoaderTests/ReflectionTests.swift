@@ -53,7 +53,7 @@ class ReflectionTests: XCTestCase {
         ReflectionFake.reset()
     }
     
-    func testInstanceReflection() {
+    func testInstanceReflectionOnClass() {
         let method = try! Reflection.instanceMethod(NSSelectorFromString("instanceMethod1"), cls: ReflectionFake.self)
         method()
         
@@ -61,8 +61,25 @@ class ReflectionTests: XCTestCase {
         XCTAssertTrue(ReflectionFake.gotCalled)
     }
     
-    func testInstanceReflectionWithArgs() {
+    func testInstanceReflectionOnClassWithArgs() {
         let method = try! Reflection.instanceMethodWithArg(NSSelectorFromString("instanceMethod2:"), cls: ReflectionFake.self)
+        method("fake1")
+        
+        XCTAssertEqual(ReflectionFake.gotMethod, "instanceMethod2:")
+        XCTAssertTrue(ReflectionFake.gotCalled)
+        XCTAssertEqual(ReflectionFake.gotObj as? String, "fake1")
+    }
+    
+    func testInstanceReflection() {
+        let method = try! Reflection.instanceMethod(NSSelectorFromString("instanceMethod1"), ins: ReflectionFake())
+        method()
+        
+        XCTAssertEqual(ReflectionFake.gotMethod, "instanceMethod1")
+        XCTAssertTrue(ReflectionFake.gotCalled)
+    }
+    
+    func testInstanceReflectionWithArgs() {
+        let method = try! Reflection.instanceMethodWithArg(NSSelectorFromString("instanceMethod2:"), ins: ReflectionFake())
         method("fake1")
         
         XCTAssertEqual(ReflectionFake.gotMethod, "instanceMethod2:")

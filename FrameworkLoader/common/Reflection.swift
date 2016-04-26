@@ -28,6 +28,28 @@ public class Reflection: NSObject {
         return try internalInstanceMethod(sel, cls: cls)
     }
     
+    public static func instanceMethod(sel: Selector, ins: AnyObject) throws -> () -> Void {
+        let fn = try internalInstanceMethod(sel, ins: ins)
+        return { fn(nil) }
+    }
+    
+    public static func instanceMethodWithArg(sel: Selector, ins: AnyObject) throws -> (AnyObject?) -> Void {
+        return try internalInstanceMethod(sel, ins: ins)
+    }
+    
+    private static func internalInstanceMethod(sel: Selector, ins: AnyObject) throws -> (AnyObject?) -> Void {
+        guard ins.isKindOfClass(NSObject) else {
+            throw ReflectionError.ClassNotConformNSObjectType
+        }
+        
+        let method = class_getInstanceMethod(ins.dynamicType, sel)
+        guard method != nil else {
+            throw ReflectionError.SelectorNotFound(sel, ins.dynamicType)
+        }
+        
+        return { arg in ins.performSelector(sel, onThread: NSThread.currentThread(), withObject: arg, waitUntilDone: true) }
+    }
+    
     private static func internalInstanceMethod(sel: Selector, cls: AnyClass) throws -> (AnyObject?) -> Void {
         guard cls is NSObject.Type else {
             throw ReflectionError.ClassNotConformNSObjectType
