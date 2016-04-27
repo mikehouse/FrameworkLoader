@@ -30,10 +30,12 @@ zip -qr MyFramework.zip MyFramework.framework/
 - Download and run the framework bundle on client:
 
 ```swift
+import UIKit
 import FrameworkLoader
 
 let url = NSURL(string: "http://localhost:8080/frameworks/MyFramework.zip")!;
-let request = NSURLRequest(URL: url)
+let NSMutableURLRequest = NSURLRequest(URL: url)
+request.HTTPMethod = "POST"
 Loader(request: request).fetchAsync { (fetchError, loader) in
     if let er = fetchError {
         // something went wrong, it might be:
@@ -46,13 +48,10 @@ Loader(request: request).fetchAsync { (fetchError, loader) in
         do {
             let bundle = try loader.tryLoad()
             
-            // want to show controllers from loaded bundle
-            
-            let navigationController = UINavigationController(nibName: "MyNavViewController", bundle: bundle.bundle)
-            let rootController = UIViewController(nibName: "MyRootViewController", bundle: bundle.bundle)
-            navigationController.viewControllers = [rootController]
-            
-            self.presentViewController(navigationController, animated: true)
+            // want to show controller from loaded bundle
+                        
+            let controller = UIViewController(nibName: "MyViewController", bundle: bundle.bundle)            
+            self.presentViewController(controller, animated: true, completion: nil)
             
             // or call method on runtime!
             
@@ -83,26 +82,18 @@ import FrameworkLoader
 
 guard let bundle = Bundle(name: "MyFramework") else { return }
 
-// want to show controllers from loaded bundle
+let controller = UIViewController(nibName: "MyViewController", bundle: bundle.bundle)            
+self.presentViewController(controller, animated: true, completion: nil)
+```
 
-let navigationController = UINavigationController(nibName: "MyNavViewController", bundle: bundle.bundle)
-let rootController = UIViewController(nibName: "MyRootViewController", bundle: bundle.bundle)
-navigationController.viewControllers = [rootController]
+- check of framework bundles states
 
-self.presentViewController(navigationController, animated: true)
+```swift
+let fm = NSFileManager.defaultManager()
 
-// or call method on runtime!
-
-guard let myCustomAlertClass = bundle.loadClass("MyCustomAlertClass") else { return }
-
-// call method without args
-let method = try! Reflection.instanceMethod(NSSelectorFromString("showAlert"), cls: myCustomAlertClass)
-method() // showAlert
-
-// call method with one arg
-let methodWithArg = try! Reflection.instanceMethodWithArg(NSSelectorFromString("showAlertWIthTitle:"), cls: myCustomAlertClass)
-methodWithArg("Hi there!") // show alert with title 'Hi there!'
-
+fm.customFrameworks() // returns a list of paths of all loaded bundles
+fm.customFrameworkPath("MyFramework") // returns a path string for bundle name or nil
+fm.removeAllCustomFrameworks() // removes all loaded framework bundles
 ```
 
 
