@@ -30,14 +30,22 @@ public class Loader: NSObject, LoaderProtocol {
     
     private func fetch(completion: (LoaderError?, Loader) -> Void) {
         let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(), delegate: nil, delegateQueue: NSOperationQueue())
-        let task = session.dataTaskWithRequest(request) { (data, _, error) in
+        let task = session.dataTaskWithRequest(request) { (data, resp, error) in
             if let er = error {
                 self.fetchStatus = .Nothing
                 completion(LoaderError.RequestError(er), self)
             } else {
+                if let response = resp as? NSHTTPURLResponse where response.statusCode != 200 {
+                    self.fetchStatus = .Nothing
+                    let msg = "Server error with status code \(response.statusCode)"
+                    let e = NSError(domain: kErrorDomain, code: -94, userInfo: [NSLocalizedDescriptionKey:msg])
+                    completion(LoaderError.RequestError(e), self)
+                    return
+                }
+                
                 let fm = NSFileManager.defaultManager()
                 
-                guard let savedDataPath = fm.createFileAtTempDir(data!) else {
+                guard let savedDataPath = fm.createFileAtTempDir(data!, ext: ".zip") else {
                     self.fetchStatus = .Nothing
                     let msg = "Not writable response data for request \(self.request)"
                     let e = NSError(domain: kErrorDomain, code: -97, userInfo: [NSLocalizedDescriptionKey:msg])

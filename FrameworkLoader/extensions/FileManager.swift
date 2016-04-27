@@ -71,7 +71,7 @@ extension NSFileManager {
     }
     
     func unzip(whereDir: String, zipFile: String) -> String? {
-        let path = (whereDir as NSString).stringByAppendingPathComponent(String(Int64(CFAbsoluteTimeGetCurrent())))
+        let path = (whereDir as NSString).stringByAppendingPathComponent(randomFileName())
         return SSZipArchive.unzipFileAtPath(zipFile, toDestination: path) ? path : nil
     }
     
@@ -80,19 +80,25 @@ extension NSFileManager {
     }
     
     // returns a path to written file
-    func createFileAtTempDir(data: NSData) -> String? {
+    func createFileAtTempDir(data: NSData, ext: String) -> String? {
         let cache = NSSearchPathForDirectoriesInDomains(.CachesDirectory, .UserDomainMask, true).first!
-        if !fileExistsAtPath(cache) {
-            try! createDirectoryAtPath(cache, withIntermediateDirectories: true, attributes: nil) // must not fail
+        let path = (cache as NSString).stringByAppendingPathComponent(randomFileName())
+        if !fileExistsAtPath(path) {
+            try! createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: nil) // must not fail
         }
         
-        let path = (cache as NSString).stringByAppendingPathComponent(String(Int64(CFAbsoluteTimeGetCurrent())))
+        let zipName = randomFileName() + ext
+        let fullPath = (path as NSString).stringByAppendingPathComponent(zipName)
         do {
-            try data.writeToFile(path, options: .AtomicWrite)
-            return path
+            try data.writeToFile(fullPath, options: .AtomicWrite)
+            return fullPath
         } catch { print(error) }
         
         return nil
+    }
+    
+    func randomFileName() -> String {
+        return String(Int64(CFAbsoluteTimeGetCurrent()))
     }
     
 }
