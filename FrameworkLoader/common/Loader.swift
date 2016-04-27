@@ -33,13 +33,11 @@ public class Loader: NSObject, LoaderProtocol {
         let task = session.dataTaskWithRequest(request) { (data, resp, error) in
             if let er = error {
                 self.fetchStatus = .Nothing
-                completion(LoaderError.RequestError(er), self)
+                completion(LoaderError.RequestError(er.localizedDescription), self)
             } else {
                 if let response = resp as? NSHTTPURLResponse where response.statusCode != 200 {
                     self.fetchStatus = .Nothing
-                    let msg = "Server error with status code \(response.statusCode)"
-                    let e = NSError(domain: kErrorDomain, code: -94, userInfo: [NSLocalizedDescriptionKey:msg])
-                    completion(LoaderError.RequestError(e), self)
+                    completion(LoaderError.RequestError("Server error with status code \(response.statusCode)"), self)
                     return
                 }
                 
@@ -47,9 +45,7 @@ public class Loader: NSObject, LoaderProtocol {
                 
                 guard let savedDataPath = fm.createFileAtTempDir(data!, ext: ".zip") else {
                     self.fetchStatus = .Nothing
-                    let msg = "Not writable response data for request \(self.request)"
-                    let e = NSError(domain: kErrorDomain, code: -97, userInfo: [NSLocalizedDescriptionKey:msg])
-                    completion(LoaderError.InvalidZipFile(e), self)
+                    completion(LoaderError.InvalidZipFile("Not writable response data for request \(self.request)"), self)
                     return
                 }
                 
@@ -57,9 +53,7 @@ public class Loader: NSObject, LoaderProtocol {
                 
                 guard let unzipPath = fm.unzip(savedDataPath) else {
                     self.fetchStatus = .Nothing
-                    let msg = "Unzippable response data for request \(self.request)"
-                    let e = NSError(domain: kErrorDomain, code: -96, userInfo: [NSLocalizedDescriptionKey:msg])
-                    completion(LoaderError.InvalidZipFile(e), self)
+                    completion(LoaderError.InvalidZipFile("Unzippable response data for request \(self.request)"), self)
                     return
                 }
                 
@@ -67,9 +61,7 @@ public class Loader: NSObject, LoaderProtocol {
                 
                 guard let frPath = fm.customFrameworksAtPath(unzipPath).first else {
                     self.fetchStatus = .Nothing
-                    let msg = "Zip archive does not have any frameworks files in for request \(self.request)"
-                    let e = NSError(domain: kErrorDomain, code: -95, userInfo: [NSLocalizedDescriptionKey:msg])
-                    completion(LoaderError.InvalidZipFile(e), self)
+                    completion(LoaderError.InvalidZipFile("Zip archive does not have any frameworks files in for request \(self.request)"), self)
                     return
                 }
                 
@@ -85,8 +77,7 @@ public class Loader: NSObject, LoaderProtocol {
     
     public func tryLoad() throws -> BundleProtocol {
         guard fetchStatus == .Fetched, let path = frameworkPath else {
-            let msg = "Must call #fetchAsync: with success result before!"
-            throw LoaderError.BundleError(NSError(domain: kErrorDomain, code: -99, userInfo: [NSLocalizedDescriptionKey:msg]))
+            throw LoaderError.BundleError("Must call #fetchAsync: with success result before!")
         }
         
         if let bundle = NSBundle(path: path) {
@@ -94,8 +85,7 @@ public class Loader: NSObject, LoaderProtocol {
             
             return Bundle(bundle: bundle)
         } else {
-            let msg = "Could not load Bundle for framework path \(path)"
-            throw LoaderError.BundleError(NSError(domain: kErrorDomain, code: -98, userInfo: [NSLocalizedDescriptionKey:msg]))
+            throw LoaderError.BundleError("Could not load Bundle for framework path \(path)")
         }
     }
 

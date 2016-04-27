@@ -18,11 +18,13 @@ public enum FetchStatus {
     
 }
 
-public enum LoaderError: ErrorType {
+public enum LoaderError: ErrorType, CustomStringConvertible {
     
-    case RequestError(NSError)
-    case InvalidZipFile(NSError)
-    case BundleError(NSError)
+    case RequestError(String)
+    case InvalidZipFile(String)
+    case BundleError(String)
+    
+    public var description: String { return "\(self)" }
     
 }
 
