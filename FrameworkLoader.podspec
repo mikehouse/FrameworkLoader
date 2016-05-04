@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "FrameworkLoader"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "Simple utility to download framework bundles from network"
   s.homepage     = "https://github.com/mikehouse/FrameworkLoader"
   s.license      = { :type => "MIT", :file => "LICENSE" } 
