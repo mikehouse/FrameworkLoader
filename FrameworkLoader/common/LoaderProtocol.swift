@@ -24,7 +24,13 @@ public enum LoaderError: ErrorType, CustomStringConvertible {
     case InvalidZipFile(String)
     case BundleError(String)
     
-    public var description: String { return "\(self)" }
+    public var description: String {
+        switch self {
+        case .RequestError(let er): return "LoaderError: \(er)"
+        case .InvalidZipFile(let er): return "InvalidZipFile: \(er)"
+        case .BundleError(let er): return "BundleError: \(er)"
+        }
+    }
     
 }
 
